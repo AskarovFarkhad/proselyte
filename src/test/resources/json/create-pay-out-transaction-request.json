@@ -1,0 +1,15 @@
+{
+  "payment_method": "CARD",
+  "amount": "1000",
+  "currency": "BRL",
+  "card_data": {
+    "card_number": "4102440066774893"
+  },
+  "language": "en",
+  "notification_url": "https://proselyte.net/webhook/payout",
+  "customer": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "country": "BR"
+  }
+}

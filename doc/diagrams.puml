@@ -1,0 +1,146 @@
+@startuml
+participant client as client
+participant "fake-payment-provider" as mcs
+participant database as db
+participant "webhook-service" as whook
+
+alt Запрос на получение транзакций пополнения
+client -> mcs: GET /transaction/list
+
+mcs -> db: Запрос аутентификационных данных
+db-> mcs: Получение ответа
+mcs -> mcs: Аутентификация
+alt Аутентификация клиента не пройдена
+mcs -> client: HTTP Status 401 Unauthorized
+end group
+
+mcs  -> db: Запрос с выборкой транзакций на текущий день
+db-> mcs: Получение ответа
+mcs -> client: HTTP Status 200 ОК
+end group
+
+alt Запрос на получение транзакций пополнения за определенное время
+client -> mcs: GET /transaction/list?start_date=UNIX_TIMESTAMP&end_date=UNIX_TIMESTAMP
+
+mcs -> db: Запрос аутентификационных данных
+db-> mcs: Получение ответа
+mcs -> mcs: Аутентификация
+alt Аутентификация клиента не пройдена
+mcs -> client: HTTP Status 401 Unauthorized
+end group
+
+mcs  -> db: Запрос с выборкой транзакций с start_date по end_date
+db -> mcs: Получение ответа
+mcs -> client: HTTP Status 200 ОК
+end group
+
+alt Запрос на получение деталей транзакции (последнего статуса)
+client -> mcs: GET /transaction/{transactionId}/details
+
+mcs -> db: Запрос аутентификационных данных
+db-> mcs: Получение ответа
+mcs -> mcs: Аутентификация
+alt Аутентификация клиента не пройдена
+mcs -> client: HTTP Status 401 Unauthorized
+end group
+
+mcs -> db: Запрос на получение последнего статуса транзакции по transactionId
+db -> mcs: Получение ответа
+mcs -> client: HTTP Status 200 ОК
+end group
+
+alt Запрос на получение транзакций снятия
+client -> mcs: GET GET /payout/list
+
+mcs -> db: Запрос аутентификационных данных
+db-> mcs: Получение ответа
+mcs -> mcs: Аутентификация
+alt Аутентификация клиента не пройдена
+mcs -> client: HTTP Status 401 Unauthorized
+end group
+
+mcs  -> db: Запрос с выборкой транзакций на текущий день
+db-> mcs: Получение ответа
+mcs -> client: HTTP Status 200 ОК
+end group
+
+alt Запрос на получение транзакций снятия за определенное время
+client -> mcs: GET /payout/list?start_date=UNIX_TIMESTAMP&end_date=UNIX_TIMESTAMP
+
+mcs -> db: Запрос аутентификационных данных
+db-> mcs: Получение ответа
+mcs -> mcs: Аутентификация
+alt Аутентификация клиента не пройдена
+mcs -> client: HTTP Status 401 Unauthorized
+end group
+
+mcs  -> db: Запрос с выборкой транзакций с start_date по end_date
+db -> mcs: Получение ответа
+mcs -> client: HTTP Status 200 ОК
+end group
+
+alt Запрос на получение деталей транзакции снятия (последнего статуса)
+client -> mcs: GET /payout/{payoutId}/details
+
+mcs -> db: Запрос аутентификационных данных
+db-> mcs: Получение ответа
+mcs -> mcs: Аутентификация
+alt Аутентификация клиента не пройдена
+mcs -> client: HTTP Status 401 Unauthorized
+end group
+
+mcs -> db: Запрос на получение последнего статуса транзакции по payoutId
+db -> mcs: Получение ответа
+mcs -> client: HTTP Status 200 ОК
+end group
+
+alt Запрос на создание транзакции пополнения
+client -> mcs: POST /payout
+
+mcs -> db: Запрос аутентификационных данных
+db-> mcs: Получение ответа
+mcs -> mcs: Аутентификация
+alt Аутентификация клиента не пройдена
+mcs -> client: HTTP Status 401 Unauthorized
+end group
+
+mcs -> mcs: Валидация данных карты (16 цифр),\nроверка срока карты,\nпроверка даты создания платежа,\nпроверка баланса счета торгового агента
+alt Валидация не пройдена
+mcs -> client: HTTP Status 400 Bad Request
+end group
+
+mcs -> mcs: Установка статуса IN_PROGRESS
+mcs -> db: Сохранение транзакции в базу данных
+mcs -> client: HTTP Status 200 ОК
+end group
+
+alt Запрос на создание транзакции снятия
+client -> mcs: POST /payout
+
+mcs -> db: Запрос аутентификационных данных
+db-> mcs: Получение ответа
+mcs -> mcs: Аутентификация
+alt Аутентификация клиента не пройдена
+mcs -> client: HTTP Status 401 Unauthorized
+end group
+
+mcs -> mcs: Валидация данных карты (16 цифр),\nпроверка даты создания платежа,\nпроверка баланса счета торгового агента
+alt Валидация не пройдена
+mcs -> client: HTTP Status 400 Bad Request
+end group
+
+mcs -> mcs: Установка статуса IN_PROGRESS
+mcs -> db: Сохранение транзакции в базу данных
+mcs -> client: HTTP Status 200 ОК
+end group
+
+alt Внутренний метод для обработки платежей и отправки вебхуков
+mcs -> mcs : Запуск метода по cron (конфигурационный параметр)
+mcs -> db: Запрос транзакций в статусе IN_PROGRESS
+db -> mcs: Получение ответа
+
+mcs -> mcs: Обработка платежей, проставление конечного статуса (SUCCESS, FAILED)
+mcs -> db: Сохранение транзакции в базу данных
+mcs -> whook: Отправка уведомления о статусе транзакции (3 попытки)
+end group
+@enduml
