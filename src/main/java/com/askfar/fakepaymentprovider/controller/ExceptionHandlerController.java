@@ -55,4 +55,14 @@ public class ExceptionHandlerController {
                                .timestamp(LocalDateTime.now())
                                .build();
     }
+
+    @ExceptionHandler(SecurityException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponseDto handleSecurityException(SecurityException ex) {
+        log.error(ex.getMessage(), ex);
+        return ErrorResponseDto.builder()
+                               .message(ex.getMessage())
+                               .timestamp(LocalDateTime.now())
+                               .build();
+    }
 }
