@@ -1,7 +1,10 @@
 package com.askfar.fakepaymentprovider.service.impl;
 
 import com.askfar.fakepaymentprovider.dto.TransactionTopUpResponseDto;
+import com.askfar.fakepaymentprovider.entity.Transaction;
 import com.askfar.fakepaymentprovider.mapper.TransactionMapper;
+import com.askfar.fakepaymentprovider.repository.CardRepository;
+import com.askfar.fakepaymentprovider.repository.CustomerRepository;
 import com.askfar.fakepaymentprovider.repository.TransactionRepository;
 import com.askfar.fakepaymentprovider.service.TransactionTopUpService;
 import lombok.RequiredArgsConstructor;
@@ -25,20 +28,20 @@ public class TransactionTopUpServiceImpl implements TransactionTopUpService {
 
     private final TransactionRepository transactionRepository;
 
+    private final CustomerRepository customerRepository;
+
+    private final CardRepository cardRepository;
+
     @Override
     public Mono<TransactionTopUpResponseDto> findTransactionDetails(@PathVariable UUID transactionId) {
-        // TODO implement security
         return transactionRepository.findByTransactionId(transactionId)
-                                    .map(transaction -> transaction.orElseThrow(RuntimeException::new))
-                                    .log()
+                                    .flatMap(this::loadRelations)
                                     .map(transactionMapper::toMapTopUpResponseDto);
     }
 
     @Override
     public Mono<Page<TransactionTopUpResponseDto>> findTransactionAll(Pageable pageable) {
-        // TODO implement security
         return this.transactionRepository.findAllByToday(pageable)
-                                         .log()
                                          .map(transactionMapper::toMapTopUpResponseDto)
                                          .collectList()
                                          .zipWith(this.transactionRepository.countAllByToday())
@@ -47,12 +50,19 @@ public class TransactionTopUpServiceImpl implements TransactionTopUpService {
 
     @Override
     public Mono<Page<TransactionTopUpResponseDto>> findTransactionAll(LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        // TODO implement security
         return this.transactionRepository.findAllByQueryDate(startDate, endDate, pageable)
-                                         .log()
                                          .map(transactionMapper::toMapTopUpResponseDto)
                                          .collectList()
                                          .zipWith(this.transactionRepository.countAllByQueryDate(startDate, endDate))
                                          .map(page -> new PageImpl<>(page.getT1(), pageable, page.getT2()));
+    }
+
+    private Mono<Transaction> loadRelations(final Transaction transaction) {
+        Mono<Transaction> transactionMono = Mono.just(transaction)
+                                                .zipWith(customerRepository.findById(transaction.getCustomerId()))
+                                                .map(result -> result.getT1().setCustomer(result.getT2()));
+
+        return transactionMono.zipWith(cardRepository.findById(transaction.getCardId()))
+                              .map(result -> result.getT1().setCard(result.getT2()));
     }
 }

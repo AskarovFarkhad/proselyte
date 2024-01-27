@@ -35,7 +35,7 @@ public class TransactionTopUpRequestDto {
     private LocalDateTime updatedAt;
 
     @Valid
-    private CardDto cardData;
+    private CardResponseDto cardData;
 
     @NotBlank
     private String language;

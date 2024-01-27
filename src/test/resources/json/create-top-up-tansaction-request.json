@@ -10,7 +10,7 @@
     "cvv": "566"
   },
   "language": "en",
-  "notification_url": "https://proselyte.net/webhook/transaction"
+  "notification_url": "https://proselyte.net/webhook/transaction",
   "customer": {
     "first_name": "John",
     "last_name": "Doe",

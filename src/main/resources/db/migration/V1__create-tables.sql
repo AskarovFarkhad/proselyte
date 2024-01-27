@@ -7,7 +7,7 @@ CREATE TABLE merchants
 
 CREATE TABLE wallets
 (
-    wallet_id  SERIAL PRIMARY KEY,
+    wallet_id   SERIAL PRIMARY KEY,
     currency    VARCHAR(8)  NOT NULL,
     balance     NUMERIC,
     merchant_id VARCHAR(64) NOT NULL,
@@ -44,12 +44,12 @@ CREATE TABLE transactions
     updated_at       TIMESTAMP,
     language         VARCHAR(2)  NOT NULL,
     notification_url VARCHAR(128),
-    customer         INT,
-    card_data        INT,
+    customer_id      INT,
+    card_id          INT,
     status           VARCHAR(16) NOT NULL,
     message          VARCHAR(32),
-    FOREIGN KEY (customer) REFERENCES customers (customer_id),
-    FOREIGN KEY (card_data) REFERENCES cards (card_id)
+    FOREIGN KEY (customer_id) REFERENCES customers (customer_id),
+    FOREIGN KEY (card_id) REFERENCES cards (card_id)
 );
 
 CREATE TABLE webhooks_history
@@ -58,6 +58,6 @@ CREATE TABLE webhooks_history
     notification_url VARCHAR(128),
     created_at       TIMESTAMP    NOT NULL,
     response         VARCHAR(128) NOT NULL,
-    transaction_id   INT         NOT NULL,
+    transaction_id   INT          NOT NULL,
     FOREIGN KEY (transaction_id) REFERENCES transactions (id)
 );

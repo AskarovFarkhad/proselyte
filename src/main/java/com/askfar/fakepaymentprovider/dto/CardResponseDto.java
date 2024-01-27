@@ -7,18 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Date;
-
 @Data
 @Validated
 @Builder(toBuilder = true)
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class CardDto {
+public class CardResponseDto {
 
     @Size(min = 16, max = 16, message = "The card number must consist of 16 characters")
     private String cardNumber;
-
-    private Date expDate;
-
-    private int cvv;
 }

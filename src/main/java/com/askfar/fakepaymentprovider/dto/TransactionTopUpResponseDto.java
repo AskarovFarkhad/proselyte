@@ -2,6 +2,7 @@ package com.askfar.fakepaymentprovider.dto;
 
 import com.askfar.fakepaymentprovider.enums.CurrencyEnum;
 import com.askfar.fakepaymentprovider.enums.PaymentMethod;
+import com.askfar.fakepaymentprovider.enums.TransactionStatus;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.Valid;
@@ -14,12 +15,15 @@ import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Validated
 @Builder(toBuilder = true)
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TransactionTopUpResponseDto {
+
+    private UUID transactionId;
 
     private PaymentMethod paymentMethod;
 
@@ -35,7 +39,7 @@ public class TransactionTopUpResponseDto {
     private LocalDateTime updatedAt;
 
     @Valid
-    private CardDto cardData;
+    private CardResponseDto cardData;
 
     @NotBlank
     private String language;
@@ -46,7 +50,7 @@ public class TransactionTopUpResponseDto {
     @Valid
     private CustomerDto customer;
 
-    private String status;
+    private TransactionStatus status;
 
     private String message;
 }

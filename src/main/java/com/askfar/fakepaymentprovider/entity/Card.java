@@ -5,9 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -21,9 +22,10 @@ public class Card {
 
     private String cardNumber;
 
-    private Date expDate;
+    private LocalDate expDate;
 
     private int cvv;
 
-    private Long customerId;
+    @Transient
+    private Customer customer;
 }
