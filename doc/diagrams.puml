@@ -95,7 +95,7 @@ mcs -> client: HTTP Status 200 ОК
 end group
 
 alt Запрос на создание транзакции пополнения
-client -> mcs: POST /payout
+client -> mcs: POST /transaction
 
 mcs -> db: Запрос аутентификационных данных
 db-> mcs: Получение ответа

@@ -1,5 +1,6 @@
-package com.askfar.fakepaymentprovider.dto;
+package com.askfar.fakepaymentprovider.dto.request;
 
+import com.askfar.fakepaymentprovider.dto.CustomerDto;
 import com.askfar.fakepaymentprovider.enums.CurrencyEnum;
 import com.askfar.fakepaymentprovider.enums.PaymentMethod;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -35,7 +36,7 @@ public class TransactionTopUpRequestDto {
     private LocalDateTime updatedAt;
 
     @Valid
-    private CardResponseDto cardData;
+    private CardRequestDto cardData;
 
     @NotBlank
     private String language;

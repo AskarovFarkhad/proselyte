@@ -1,4 +1,4 @@
-package com.askfar.fakepaymentprovider.entity;
+package com.askfar.fakepaymentprovider.model;
 
 import com.askfar.fakepaymentprovider.enums.PaymentMethod;
 import com.askfar.fakepaymentprovider.enums.TransactionStatus;

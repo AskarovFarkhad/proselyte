@@ -1,53 +1,59 @@
 package com.askfar.fakepaymentprovider.controller;
 
-import com.askfar.fakepaymentprovider.dto.TransactionTopUpResponseDto;
+import com.askfar.fakepaymentprovider.dto.response.TransactionResponseDto;
+import com.askfar.fakepaymentprovider.dto.request.TransactionTopUpRequestDto;
+import com.askfar.fakepaymentprovider.dto.response.TransactionCreateResponseDto;
+import com.askfar.fakepaymentprovider.model.Transaction;
 import com.askfar.fakepaymentprovider.security.SecurityService;
-import com.askfar.fakepaymentprovider.service.impl.TransactionTopUpServiceImpl;
+import com.askfar.fakepaymentprovider.service.impl.TransactionServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/payments/transaction")
+@RequestMapping("api/v1/payments")
 public class TransactionTopUpController {
 
-    private final TransactionTopUpServiceImpl topUpService;
+    private final TransactionServiceImpl topUpService;
 
     private final SecurityService securityService;
 
-    @GetMapping("/{transactionId}/details")
-    public Mono<TransactionTopUpResponseDto> findTransactionDetails(@RequestHeader("Authorization") String authorization, @PathVariable UUID transactionId) {
-        if (securityService.authorization(authorization)) {
-            return topUpService.findTransactionDetails(transactionId);
-        }
-        throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
+    @Operation(tags = "findTransactionDetails", description = "Get transaction details", summary = "To get transaction details by TransactionId")
+    @GetMapping("/transaction/{transactionId}/details")
+    public Mono<TransactionResponseDto> findTransactionDetails(@RequestHeader("Authorization") String auth, @PathVariable UUID transactionId) {
+        securityService.authorization(auth);
+        return topUpService.findTransactionDetails(transactionId);
     }
 
-    @GetMapping("/list")
-    public Mono<Page<TransactionTopUpResponseDto>> findTransactionAll(
-            @RequestHeader("Authorization") String authorization,
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate,
-            Pageable pageable) {
-        if (securityService.authorization(authorization)) {
-            if (nonNull(startDate) && nonNull(endDate)) {
-                return topUpService.findTransactionAll(startDate, endDate, pageable);
-            } else {
-                return topUpService.findTransactionAll(pageable);
-            }
+    @GetMapping("/transaction/list")
+    public Mono<Page<TransactionResponseDto>> findTransactionAll(@RequestHeader(name = "Authorization") String auth, Pageable pageable,
+            @RequestParam(required = false, name = "start_date") LocalDateTime startDate,
+            @RequestParam(required = false, name = "end_date") LocalDateTime endDate) {
+
+        securityService.authorization(auth);
+        if (nonNull(startDate) && nonNull(endDate)) {
+            return topUpService.findTransactionAll(startDate, endDate, pageable);
         }
-        throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
+        return topUpService.findTransactionAll(pageable);
     }
 
-    // TODO implement POST method
+    @PostMapping("/transaction")
+    public Mono<ResponseEntity<TransactionCreateResponseDto>> createTransaction(
+            @RequestHeader("Authorization") String auth, @Valid @RequestBody TransactionTopUpRequestDto requestDto) {
+
+        securityService.authorization(auth);
+        Mono<Transaction> topUpTransaction = topUpService.createTransaction(requestDto, null);
+        return null;
+    }
 }

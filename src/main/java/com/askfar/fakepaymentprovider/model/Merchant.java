@@ -1,4 +1,4 @@
-package com.askfar.fakepaymentprovider.entity;
+package com.askfar.fakepaymentprovider.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

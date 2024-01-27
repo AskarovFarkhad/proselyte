@@ -50,6 +50,8 @@ dependencies {
 
     implementation "org.mapstruct:mapstruct:$mapstructVersion"
     annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
+
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.20'
 }
 
 tasks.named('test') {

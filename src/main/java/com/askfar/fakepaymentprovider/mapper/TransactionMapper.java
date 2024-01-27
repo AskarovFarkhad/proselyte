@@ -1,8 +1,9 @@
 package com.askfar.fakepaymentprovider.mapper;
 
-import com.askfar.fakepaymentprovider.dto.TransactionTopUpRequestDto;
-import com.askfar.fakepaymentprovider.dto.TransactionTopUpResponseDto;
-import com.askfar.fakepaymentprovider.entity.Transaction;
+import com.askfar.fakepaymentprovider.dto.request.TransactionTopUpRequestDto;
+import com.askfar.fakepaymentprovider.dto.response.TransactionResponseDto;
+import com.askfar.fakepaymentprovider.model.Transaction;
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -10,8 +11,22 @@ import org.mapstruct.Mapping;
 public interface TransactionMapper {
 
     @Mapping(target = "cardData", source = "card")
-    TransactionTopUpRequestDto toMapTopUpRequestDto(Transaction entity);
+    TransactionTopUpRequestDto toMapRequestDto(Transaction entity);
 
     @Mapping(target = "cardData", source = "card")
-    TransactionTopUpResponseDto toMapTopUpResponseDto(Transaction entity);
+    TransactionResponseDto toMapResponseDto(Transaction entity);
+
+    @InheritInverseConfiguration
+    @Mapping(target = "card", source = "cardData")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "transactionId", ignore = true)
+    @Mapping(target = "transactionType", ignore = true)
+    @Mapping(target = "customerId", ignore = true)
+    @Mapping(target = "cardId", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "message", ignore = true)
+    @Mapping(target = "card.cardId", ignore = true)
+    @Mapping(target = "card.customer", ignore = true)
+    @Mapping(target = "customer.customerId", ignore = true)
+    Transaction toTransactionEntity(TransactionTopUpRequestDto requestDto);
 }

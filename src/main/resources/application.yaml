@@ -14,3 +14,6 @@ spring:
     locations: classpath:db/migration
     user: postgres
     password: postgres
+
+scheduled:
+  cron: "0 */30 * ? * *"

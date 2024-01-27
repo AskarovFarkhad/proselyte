@@ -1,5 +1,6 @@
-package com.askfar.fakepaymentprovider.dto;
+package com.askfar.fakepaymentprovider.dto.response;
 
+import com.askfar.fakepaymentprovider.dto.CustomerDto;
 import com.askfar.fakepaymentprovider.enums.CurrencyEnum;
 import com.askfar.fakepaymentprovider.enums.PaymentMethod;
 import com.askfar.fakepaymentprovider.enums.TransactionStatus;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @Validated
 @Builder(toBuilder = true)
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class TransactionTopUpResponseDto {
+public class TransactionResponseDto {
 
     private UUID transactionId;
 
