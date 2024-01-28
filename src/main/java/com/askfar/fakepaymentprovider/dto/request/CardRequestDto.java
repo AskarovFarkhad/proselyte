@@ -8,7 +8,6 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
@@ -16,10 +15,10 @@ import java.time.LocalDate;
 
 @Data
 @Validated
-@Builder(toBuilder = true)
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class CardRequestDto {
 
+    @NotNull
     @Size(min = 16, max = 16)
     private String cardNumber;
 
@@ -28,6 +27,7 @@ public class CardRequestDto {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate expDate;
 
+    @NotNull
     @Pattern(regexp = "\\d{3}")
-    private int cvv;
+    private String cvv;
 }

@@ -1,10 +1,10 @@
 package com.askfar.fakepaymentprovider.model;
 
+import com.askfar.fakepaymentprovider.enums.CurrencyEnum;
 import com.askfar.fakepaymentprovider.enums.PaymentMethod;
 import com.askfar.fakepaymentprovider.enums.TransactionStatus;
 import com.askfar.fakepaymentprovider.enums.TransactionType;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -20,7 +20,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-@Builder(toBuilder = true)
 @Table(name = "transactions")
 public class Transaction {
 
@@ -35,7 +34,7 @@ public class Transaction {
 
     private BigDecimal amount;
 
-    private String currency;
+    private CurrencyEnum currency;
 
     private LocalDateTime createdAt;
 

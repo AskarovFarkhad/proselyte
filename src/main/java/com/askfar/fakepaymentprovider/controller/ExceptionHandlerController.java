@@ -1,11 +1,13 @@
 package com.askfar.fakepaymentprovider.controller;
 
 import com.askfar.fakepaymentprovider.dto.response.ErrorResponseDto;
-import com.askfar.fakepaymentprovider.exception.BusinessException;
+import com.askfar.fakepaymentprovider.exception.BusinessUnknownException;
 import com.askfar.fakepaymentprovider.exception.NotFoundException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,9 +18,9 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class ExceptionHandlerController {
 
-    @ExceptionHandler(ValidationException.class)
+    @ExceptionHandler(value = {ValidationException.class, MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponseDto handeValidationException(ValidationException ex) {
+    public ErrorResponseDto handeValidationException(Exception ex) {
         log.error(ex.getMessage(), ex);
         return ErrorResponseDto.builder()
                                .message(ex.getMessage())
@@ -46,9 +48,9 @@ public class ExceptionHandlerController {
                                .build();
     }
 
-    @ExceptionHandler(BusinessException.class)
+    @ExceptionHandler(BusinessUnknownException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponseDto handleBusinessException(BusinessException ex) {
+    public ErrorResponseDto handleBusinessException(BusinessUnknownException ex) {
         log.error(ex.getMessage(), ex);
         return ErrorResponseDto.builder()
                                .message(ex.getMessage())

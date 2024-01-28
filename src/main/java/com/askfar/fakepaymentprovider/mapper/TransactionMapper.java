@@ -11,9 +11,6 @@ import org.mapstruct.Mapping;
 public interface TransactionMapper {
 
     @Mapping(target = "cardData", source = "card")
-    TransactionTopUpRequestDto toMapRequestDto(Transaction entity);
-
-    @Mapping(target = "cardData", source = "card")
     TransactionResponseDto toMapResponseDto(Transaction entity);
 
     @InheritInverseConfiguration
@@ -27,6 +24,7 @@ public interface TransactionMapper {
     @Mapping(target = "message", ignore = true)
     @Mapping(target = "card.cardId", ignore = true)
     @Mapping(target = "card.customer", ignore = true)
+    @Mapping(target = "card.customerId", ignore = true)
     @Mapping(target = "customer.customerId", ignore = true)
     Transaction toTransactionEntity(TransactionTopUpRequestDto requestDto);
 }

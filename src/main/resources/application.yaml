@@ -3,6 +3,7 @@ server:
 
 rest:
   api: api/v1/payments
+  swagger: http://localhost:8082/swagger-ui/index.html#/
 
 spring:
   r2dbc:

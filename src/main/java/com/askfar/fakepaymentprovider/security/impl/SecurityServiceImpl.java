@@ -20,7 +20,7 @@ public class SecurityServiceImpl implements SecurityService {
     private static final String ERROR_MSG = "Incorrect login information";
 
     @Override
-    public void authorization(String authorization) {
+    public String authorization(String authorization) {
         if (!authorization.startsWith("Basic ")) {
             log.error(ERROR_MSG);
             throw new SecurityException(ERROR_MSG);
@@ -44,5 +44,6 @@ public class SecurityServiceImpl implements SecurityService {
                           .block();
 
         log.info("Authorization successfully");
+        return merchantId;
     }
 }

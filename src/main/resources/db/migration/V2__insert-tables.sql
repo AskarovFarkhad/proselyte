@@ -25,3 +25,15 @@ VALUES ('https://example.com/webhook1', NOW(), 'Response1', 1),
        ('https://example.com/webhook2', NOW(), 'Response2', 2),
        ('https://example.com/webhook3', NOW(), 'Response3', 3),
        ('https://example.com/webhook4', NOW(), 'Response4', 4);
+
+-- Вставка данных в таблицу merchants
+INSERT INTO merchants (merchant_id, secret_key, enabled)
+VALUES ('PROSELYTE', 'b2eeea3e27834b7499dd7e01143a23dd', true),
+       ('merchant2', 'secret2', true),
+       ('merchant3', 'secret3', false);
+
+-- Вставка данных в таблицу wallets
+INSERT INTO wallets (currency, balance, merchant_id)
+VALUES ('USD', 100.00, 'PROSELYTE'),
+       ('EUR', 200.00, 'PROSELYTE'),
+       ('USD', 50.00, 'merchant2');
