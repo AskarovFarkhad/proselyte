@@ -1,13 +1,11 @@
 package com.askfar.fakepaymentprovider.model;
 
-import lombok.*;
+import lombok.Data;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder(toBuilder = true)
 @Table(name = "merchants")
 public class Merchant {
 

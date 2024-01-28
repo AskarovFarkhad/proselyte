@@ -1,6 +1,5 @@
 package com.askfar.fakepaymentprovider.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -12,7 +11,6 @@ import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Accessors(chain = true)
 @Table(name = "cards")
 public class Card {

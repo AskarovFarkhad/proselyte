@@ -1,6 +1,6 @@
 package com.askfar.fakepaymentprovider.mapper;
 
-import com.askfar.fakepaymentprovider.dto.request.TransactionTopUpRequestDto;
+import com.askfar.fakepaymentprovider.dto.request.TransactionRequestDto;
 import com.askfar.fakepaymentprovider.dto.response.TransactionResponseDto;
 import com.askfar.fakepaymentprovider.model.Transaction;
 import org.mapstruct.InheritInverseConfiguration;
@@ -26,5 +26,5 @@ public interface TransactionMapper {
     @Mapping(target = "card.customer", ignore = true)
     @Mapping(target = "card.customerId", ignore = true)
     @Mapping(target = "customer.customerId", ignore = true)
-    Transaction toTransactionEntity(TransactionTopUpRequestDto requestDto);
+    Transaction toTransactionEntity(TransactionRequestDto requestDto);
 }

@@ -4,9 +4,7 @@ import com.askfar.fakepaymentprovider.enums.CurrencyEnum;
 import com.askfar.fakepaymentprovider.enums.PaymentMethod;
 import com.askfar.fakepaymentprovider.enums.TransactionStatus;
 import com.askfar.fakepaymentprovider.enums.TransactionType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -17,8 +15,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Accessors(chain = true)
 @Table(name = "transactions")
 public class Transaction {

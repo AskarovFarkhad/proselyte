@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @Validated
 @Builder(toBuilder = true)
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class TransactionTopUpRequestDto {
+public class TransactionRequestDto {
 
     private PaymentMethod paymentMethod;
 

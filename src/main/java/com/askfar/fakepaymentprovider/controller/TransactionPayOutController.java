@@ -1,6 +1,6 @@
 package com.askfar.fakepaymentprovider.controller;
 
-import com.askfar.fakepaymentprovider.dto.request.TransactionTopUpRequestDto;
+import com.askfar.fakepaymentprovider.dto.request.TransactionRequestDto;
 import com.askfar.fakepaymentprovider.dto.response.TransactionCreateResponseDto;
 import com.askfar.fakepaymentprovider.dto.response.TransactionResponseDto;
 import com.askfar.fakepaymentprovider.enums.TransactionType;
@@ -45,7 +45,7 @@ public class TransactionPayOutController extends AbstractController {
     @Operation(tags = "createPayOut", description = "Create pay out top up",
             summary = "Transaction method allows to create payout (withdrawal) transaction and send money to customer payment card")
     public Mono<ResponseEntity<TransactionCreateResponseDto>> createPayOut(
-            @RequestHeader("Authorization") String auth, @Valid @RequestBody TransactionTopUpRequestDto requestDto) {
+            @RequestHeader("Authorization") String auth, @Valid @RequestBody TransactionRequestDto requestDto) {
         return super.createTransaction(auth, requestDto, TransactionType.PAY_OUT);
     }
 }

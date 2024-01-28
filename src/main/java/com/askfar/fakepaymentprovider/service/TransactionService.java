@@ -1,6 +1,6 @@
 package com.askfar.fakepaymentprovider.service;
 
-import com.askfar.fakepaymentprovider.dto.request.TransactionTopUpRequestDto;
+import com.askfar.fakepaymentprovider.dto.request.TransactionRequestDto;
 import com.askfar.fakepaymentprovider.dto.response.TransactionResponseDto;
 import com.askfar.fakepaymentprovider.enums.TransactionType;
 import com.askfar.fakepaymentprovider.model.Transaction;
@@ -19,5 +19,5 @@ public interface TransactionService {
 
     Mono<Page<TransactionResponseDto>> findTransactionAll(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, TransactionType type);
 
-    Mono<Transaction> createTransaction(TransactionTopUpRequestDto requestDto, String merchantId, TransactionType type);
+    Mono<Transaction> createTransaction(TransactionRequestDto requestDto, String merchantId, TransactionType type);
 }

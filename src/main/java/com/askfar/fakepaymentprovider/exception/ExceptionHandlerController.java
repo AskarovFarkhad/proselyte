@@ -1,8 +1,6 @@
 package com.askfar.fakepaymentprovider.exception;
 
 import com.askfar.fakepaymentprovider.dto.response.ErrorResponseDto;
-import com.askfar.fakepaymentprovider.exception.BusinessUnknownException;
-import com.askfar.fakepaymentprovider.exception.NotFoundException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

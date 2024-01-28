@@ -1,6 +1,6 @@
 package com.askfar.fakepaymentprovider.controller;
 
-import com.askfar.fakepaymentprovider.dto.request.TransactionTopUpRequestDto;
+import com.askfar.fakepaymentprovider.dto.request.TransactionRequestDto;
 import com.askfar.fakepaymentprovider.dto.response.TransactionCreateResponseDto;
 import com.askfar.fakepaymentprovider.dto.response.TransactionResponseDto;
 import com.askfar.fakepaymentprovider.enums.TransactionStatus;
@@ -43,7 +43,7 @@ public abstract class AbstractController {
                                                       : transactionService.findTransactionAll(pageable, type);
     }
 
-    protected Mono<ResponseEntity<TransactionCreateResponseDto>> createTransaction(String auth, TransactionTopUpRequestDto requestDto, TransactionType type) {
+    protected Mono<ResponseEntity<TransactionCreateResponseDto>> createTransaction(String auth, TransactionRequestDto requestDto, TransactionType type) {
 
         String merchantId = securityService.authorization(auth);
 
