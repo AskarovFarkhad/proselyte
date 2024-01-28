@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -46,7 +45,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Mono<TransactionResponseDto> findTransactionDetails(@PathVariable UUID transactionId) {
+    public Mono<TransactionResponseDto> findTransactionDetails(UUID transactionId) {
         return transactionRepository.findByTransactionId(transactionId)
                                     .flatMap(this::getRelations)
                                     .map(transactionMapper::toMapResponseDto)
@@ -56,31 +55,31 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Mono<Page<TransactionResponseDto>> findTransactionAll(Pageable pageable) {
-        return transactionRepository.findAllByToday(pageable, TransactionType.TOP_UP)
+    public Mono<Page<TransactionResponseDto>> findTransactionAll(Pageable pageable, TransactionType type) {
+        return transactionRepository.findAllByToday(pageable, type)
                                     .switchIfEmpty(Mono.error(new NotFoundException(format("Transactions by %s not found", LocalDate.now()))))
                                     .flatMap(this::getRelations)
                                     .map(transactionMapper::toMapResponseDto)
                                     .collectList()
-                                    .zipWith(transactionRepository.countAllByToday(TransactionType.TOP_UP))
+                                    .zipWith(transactionRepository.countAllByToday(type))
                                     .map(page -> new PageImpl<>(page.getT1(), pageable, page.getT2()));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Mono<Page<TransactionResponseDto>> findTransactionAll(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
-        return transactionRepository.findAllByQueryDate(startDate, endDate, pageable, TransactionType.TOP_UP)
+    public Mono<Page<TransactionResponseDto>> findTransactionAll(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, TransactionType type) {
+        return transactionRepository.findAllByQueryDate(startDate, endDate, pageable, type)
                                     .switchIfEmpty(Mono.error(new NotFoundException(format("Transactions from %s to %s not found", startDate, endDate))))
                                     .flatMap(this::getRelations)
                                     .map(transactionMapper::toMapResponseDto)
                                     .collectList()
-                                    .zipWith(transactionRepository.countAllByQueryDate(startDate, endDate, TransactionType.TOP_UP))
+                                    .zipWith(transactionRepository.countAllByQueryDate(startDate, endDate, type))
                                     .map(page -> new PageImpl<>(page.getT1(), pageable, page.getT2()));
     }
 
     @Override
     @Transactional
-    public Mono<Transaction> createTransaction(TransactionTopUpRequestDto requestDto, String merchantId) {
+    public Mono<Transaction> createTransaction(TransactionTopUpRequestDto requestDto, String merchantId, TransactionType type) {
         return walletRepository.findByMerchantIdAndCurrency(merchantId, requestDto.getCurrency().name())
                                .flatMap(wallet -> {
                                    Transaction transaction = transactionMapper.toTransactionEntity(requestDto);

@@ -1,4 +1,4 @@
-package com.askfar.fakepaymentprovider.controller;
+package com.askfar.fakepaymentprovider.exception;
 
 import com.askfar.fakepaymentprovider.dto.response.ErrorResponseDto;
 import com.askfar.fakepaymentprovider.exception.BusinessUnknownException;
