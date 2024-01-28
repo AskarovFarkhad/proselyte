@@ -11,7 +11,8 @@ public enum TransactionMessage {
     PROGRESS("Transaction accepted"),
     SUCCESS("Transaction is successfully completed"),
     PAYOUT_MIN_AMOUNT("Insufficient funds to complete the operation"),
-    CURRENCY_NOT_ALLOWED("There is no wallet with this currency");
+    CURRENCY_NOT_ALLOWED("There is no wallet with this currency"),
+    INSUFFICIENT_FUNDS("Insufficient funds to debit the account");
 
     private final String msg;
 }

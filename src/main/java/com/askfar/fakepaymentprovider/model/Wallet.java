@@ -24,4 +24,12 @@ public class Wallet {
     public void addAmount(BigDecimal amount) {
         this.balance = balance.add(amount);
     }
+
+    public void subtractAmount(BigDecimal amount) {
+        this.balance = balance.subtract(amount);
+    }
+
+    public boolean hasBalanceDepth(BigDecimal amount) {
+        return balance.subtract(amount).compareTo(BigDecimal.ZERO) != -1;
+    }
 }

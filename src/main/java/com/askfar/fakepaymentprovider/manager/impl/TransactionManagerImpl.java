@@ -39,39 +39,42 @@ public class TransactionManagerImpl implements TransactionManager {
         return walletRepository.findByMerchantIdAndCurrency(merchantId, requestDto.getCurrency().name())
                                .flatMap(wallet -> {
                                    Transaction transaction = transactionMapper.toTransactionEntity(requestDto);
-                                   if (wallet != null) {
-                                       transaction = enrichInProgress(transaction);
+                                   transaction = enrichInProgress(transaction, TransactionType.TOP_UP);
 
-                                       // бизнес логика, в нашем случае после успешной валидации берем в работу и сохраняем в хранилище
+                                   // бизнес логика, в нашем случае валидация входных данных, проверка, что существует счет с такой валютой
 
-                                       wallet.addAmount(transaction.getAmount());
-                                       return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
-                                                              .then(Mono.just(transaction))
-                                                              .flatMap(this::saveRelations);
-                                   } else {
-                                       transaction = enrichInCurrencyNotAllowedStatus(transaction);
-                                       return Mono.just(transaction);
-                                   }
-                               }).switchIfEmpty(Mono.just(transactionMapper.toTransactionEntity(requestDto)).map(this::enrichInCurrencyNotAllowedStatus));
+                                   wallet.addAmount(transaction.getAmount());
+                                   return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
+                                                          .then(Mono.just(transaction))
+                                                          .flatMap(this::saveRelations);
+                               })
+                               .switchIfEmpty(Mono.just(transactionMapper.toTransactionEntity(requestDto))
+                                                  .map(t -> enrichInCurrencyNotAllowedStatus(t, TransactionType.TOP_UP)));
     }
 
     @Override
     public Mono<Transaction> createPayOut(TransactionRequestDto requestDto, String merchantId) {
-        return null;
-    }
+        return walletRepository.findByMerchantIdAndCurrency(merchantId, requestDto.getCurrency().name())
+                               .flatMap(wallet -> {
+                                   Transaction transaction = transactionMapper.toTransactionEntity(requestDto);
+                                   transaction = enrichInProgress(transaction, TransactionType.PAY_OUT);
 
-    private Transaction enrichInProgress(Transaction transaction) {
-        return transaction.setTransactionId(UUID.randomUUID())
-                          .setTransactionType(TransactionType.TOP_UP)
-                          .setStatus(TransactionStatus.IN_PROGRESS)
-                          .setMessage(TransactionMessage.PROGRESS.getMsg())
-                          .setUpdatedAt(LocalDateTime.now());
-    }
+                                   // бизнес логика, в нашем случае валидация входных данных, проверка,
+                                   // что существует счет с такой валютой и что есть средства на счету для осуществления списания
 
-    private Transaction enrichInCurrencyNotAllowedStatus(Transaction transaction) {
-        return transaction.setTransactionType(TransactionType.TOP_UP)
-                          .setStatus(TransactionStatus.FAILED)
-                          .setMessage(TransactionMessage.CURRENCY_NOT_ALLOWED.getMsg());
+                                   if (wallet.hasBalanceDepth(transaction.getAmount())) {
+                                       wallet.subtractAmount(transaction.getAmount());
+
+                                       return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
+                                                              .then(Mono.just(transaction))
+                                                              .flatMap(this::saveRelations);
+                                   }
+
+                                   return Mono.just(transactionMapper.toTransactionEntity(requestDto))
+                                              .map(this::enrichInsufficientFundsStatus);
+                               })
+                               .switchIfEmpty(Mono.just(transactionMapper.toTransactionEntity(requestDto))
+                                                  .map(t -> enrichInCurrencyNotAllowedStatus(t, TransactionType.PAY_OUT)));
     }
 
     private Mono<Transaction> saveRelations(Transaction transaction) {
@@ -84,5 +87,25 @@ public class TransactionManagerImpl implements TransactionManager {
                    .map(card -> transaction.setCardId(card.getCardId()))
                    .flatMap(transactionRepository::save)
                    .doOnSuccess(t -> log.info("Transaction with transactionId = {} accepted", t.getTransactionId()));
+    }
+
+    private Transaction enrichInProgress(Transaction transaction, TransactionType type) {
+        return transaction.setTransactionId(UUID.randomUUID())
+                          .setTransactionType(type)
+                          .setStatus(TransactionStatus.IN_PROGRESS)
+                          .setMessage(TransactionMessage.VALIDATED.getMsg())
+                          .setUpdatedAt(LocalDateTime.now());
+    }
+
+    private Transaction enrichInCurrencyNotAllowedStatus(Transaction transaction, TransactionType type) {
+        return transaction.setTransactionType(type)
+                          .setStatus(TransactionStatus.FAILED)
+                          .setMessage(TransactionMessage.CURRENCY_NOT_ALLOWED.getMsg());
+    }
+
+    private Transaction enrichInsufficientFundsStatus(Transaction transaction) {
+        return transaction.setTransactionType(TransactionType.PAY_OUT)
+                          .setStatus(TransactionStatus.FAILED)
+                          .setMessage(TransactionMessage.INSUFFICIENT_FUNDS.getMsg());
     }
 }

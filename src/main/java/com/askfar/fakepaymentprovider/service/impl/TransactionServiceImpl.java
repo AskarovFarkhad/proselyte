@@ -47,7 +47,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findByTransactionId(transactionId)
                                     .flatMap(this::getRelations)
                                     .map(transactionMapper::toMapResponseDto)
-                                    .switchIfEmpty(Mono.error(new NotFoundException(format("Transaction by transactionId = %s not found", transactionId))))
+                                    .switchIfEmpty(Mono.error(new NotFoundException(format("Transaction by transactionId=%s not found", transactionId))))
                                     .doOnSuccess(dto -> log.info("Transaction with transactionId = {} found: {}", transactionId, dto));
     }
 
