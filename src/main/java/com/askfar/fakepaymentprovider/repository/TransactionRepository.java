@@ -1,5 +1,6 @@
 package com.askfar.fakepaymentprovider.repository;
 
+import com.askfar.fakepaymentprovider.enums.TransactionStatus;
 import com.askfar.fakepaymentprovider.enums.TransactionType;
 import com.askfar.fakepaymentprovider.model.Transaction;
 import org.springframework.data.domain.Pageable;
@@ -46,4 +47,6 @@ public interface TransactionRepository extends R2dbcRepository<Transaction, Long
             WHERE transaction_id = :transactionId AND (status = 'FAILED' OR status = 'SUCCESS')
             """)
     Mono<Transaction> findByTransactionId(UUID transactionId);
+
+    Flux<Transaction> findTransactionByStatus(TransactionStatus status);
 }

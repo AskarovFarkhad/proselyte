@@ -18,3 +18,7 @@ spring:
 
 scheduled:
   cron: "0 */30 * ? * *"
+
+webclient:
+  retryMaxAttempts: 3
+  retryMaxDelay: 3000

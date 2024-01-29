@@ -9,8 +9,8 @@ client -> mcs: GET /transaction/list
 
 mcs -> db: Запрос аутентификационных данных
 db-> mcs: Получение ответа
-mcs -> mcs: Аутентификация
-alt Аутентификация клиента не пройдена
+mcs -> mcs: Авторизация
+alt Авторизация клиента не пройдена
 mcs -> client: HTTP Status 401 Unauthorized
 end group
 
@@ -24,8 +24,8 @@ client -> mcs: GET /transaction/list?start_date=UNIX_TIMESTAMP&end_date=UNIX_TIM
 
 mcs -> db: Запрос аутентификационных данных
 db-> mcs: Получение ответа
-mcs -> mcs: Аутентификация
-alt Аутентификация клиента не пройдена
+mcs -> mcs: Авторизация
+alt Авторизация клиента не пройдена
 mcs -> client: HTTP Status 401 Unauthorized
 end group
 
@@ -39,8 +39,8 @@ client -> mcs: GET /transaction/{transactionId}/details
 
 mcs -> db: Запрос аутентификационных данных
 db-> mcs: Получение ответа
-mcs -> mcs: Аутентификация
-alt Аутентификация клиента не пройдена
+mcs -> mcs: Авторизация
+alt Авторизация клиента не пройдена
 mcs -> client: HTTP Status 401 Unauthorized
 end group
 
@@ -54,8 +54,8 @@ client -> mcs: GET GET /payout/list
 
 mcs -> db: Запрос аутентификационных данных
 db-> mcs: Получение ответа
-mcs -> mcs: Аутентификация
-alt Аутентификация клиента не пройдена
+mcs -> mcs: Авторизация
+alt Авторизация клиента не пройдена
 mcs -> client: HTTP Status 401 Unauthorized
 end group
 
@@ -69,8 +69,8 @@ client -> mcs: GET /payout/list?start_date=UNIX_TIMESTAMP&end_date=UNIX_TIMESTAM
 
 mcs -> db: Запрос аутентификационных данных
 db-> mcs: Получение ответа
-mcs -> mcs: Аутентификация
-alt Аутентификация клиента не пройдена
+mcs -> mcs: Авторизация
+alt Авторизация клиента не пройдена
 mcs -> client: HTTP Status 401 Unauthorized
 end group
 
@@ -84,8 +84,8 @@ client -> mcs: GET /payout/{payoutId}/details
 
 mcs -> db: Запрос аутентификационных данных
 db-> mcs: Получение ответа
-mcs -> mcs: Аутентификация
-alt Аутентификация клиента не пройдена
+mcs -> mcs: Авторизация
+alt Авторизация клиента не пройдена
 mcs -> client: HTTP Status 401 Unauthorized
 end group
 
@@ -99,8 +99,8 @@ client -> mcs: POST /transaction
 
 mcs -> db: Запрос аутентификационных данных
 db-> mcs: Получение ответа
-mcs -> mcs: Аутентификация
-alt Аутентификация клиента не пройдена
+mcs -> mcs: Авторизация
+alt Авторизация клиента не пройдена
 mcs -> client: HTTP Status 401 Unauthorized
 end group
 
@@ -119,8 +119,8 @@ client -> mcs: POST /payout
 
 mcs -> db: Запрос аутентификационных данных
 db-> mcs: Получение ответа
-mcs -> mcs: Аутентификация
-alt Аутентификация клиента не пройдена
+mcs -> mcs: Авторизация
+alt Авторизация клиента не пройдена
 mcs -> client: HTTP Status 401 Unauthorized
 end group
 

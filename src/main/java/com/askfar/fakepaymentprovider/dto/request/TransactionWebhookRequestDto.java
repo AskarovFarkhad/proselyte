@@ -1,26 +1,21 @@
-package com.askfar.fakepaymentprovider.model;
+package com.askfar.fakepaymentprovider.dto.request;
 
+import com.askfar.fakepaymentprovider.dto.CustomerDto;
 import com.askfar.fakepaymentprovider.enums.CurrencyEnum;
 import com.askfar.fakepaymentprovider.enums.PaymentMethod;
 import com.askfar.fakepaymentprovider.enums.TransactionStatus;
 import com.askfar.fakepaymentprovider.enums.TransactionType;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
-import lombok.experimental.Accessors;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@Accessors(chain = true)
-@Table(name = "transactions")
-public class Transaction {
-
-    @Id
-    private Long id;
+@JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+public class TransactionWebhookRequestDto {
 
     private UUID transactionId;
 
@@ -38,19 +33,9 @@ public class Transaction {
 
     private String language;
 
-    private String notificationUrl;
+    private CardRequestDto card;
 
-    private Long customerId;
-
-    @Transient
-    private Customer customer;
-
-    private Long cardId;
-
-    @Transient
-    private Card card;
-
-    private String merchantId;
+    private CustomerDto customer;
 
     private TransactionStatus status;
 

@@ -1,6 +1,7 @@
 package com.askfar.fakepaymentprovider.mapper;
 
 import com.askfar.fakepaymentprovider.dto.request.TransactionRequestDto;
+import com.askfar.fakepaymentprovider.dto.request.TransactionWebhookRequestDto;
 import com.askfar.fakepaymentprovider.dto.response.TransactionResponseDto;
 import com.askfar.fakepaymentprovider.model.Transaction;
 import org.mapstruct.InheritInverseConfiguration;
@@ -12,6 +13,11 @@ public interface TransactionMapper {
 
     @Mapping(target = "cardData", source = "card")
     TransactionResponseDto toMapResponseDto(Transaction entity);
+
+    @Mapping(target = "card.cvv", ignore = true)
+    @Mapping(target = "card.expDate", ignore = true)
+    @Mapping(target = "customer.country", ignore = true)
+    TransactionWebhookRequestDto toTransactionWebhookRequestDto(Transaction entity);
 
     @InheritInverseConfiguration
     @Mapping(target = "card", source = "cardData")
@@ -26,5 +32,6 @@ public interface TransactionMapper {
     @Mapping(target = "card.customer", ignore = true)
     @Mapping(target = "card.customerId", ignore = true)
     @Mapping(target = "customer.customerId", ignore = true)
+    @Mapping(target = "merchantId", ignore = true)
     Transaction toTransactionEntity(TransactionRequestDto requestDto);
 }

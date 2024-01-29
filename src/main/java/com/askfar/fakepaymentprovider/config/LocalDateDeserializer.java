@@ -14,7 +14,8 @@ public class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
 
     @Override
     public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-        String dateString = jsonParser.getText();
-        return LocalDate.parse("01/" + dateString, FORMATTER);
+        LocalDate date = LocalDate.parse("01/" + jsonParser.getText(), FORMATTER);
+        date = date.withDayOfMonth(date.lengthOfMonth());
+        return date;
     }
 }

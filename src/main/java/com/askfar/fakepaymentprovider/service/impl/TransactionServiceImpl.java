@@ -2,9 +2,10 @@ package com.askfar.fakepaymentprovider.service.impl;
 
 import com.askfar.fakepaymentprovider.dto.request.TransactionRequestDto;
 import com.askfar.fakepaymentprovider.dto.response.TransactionResponseDto;
+import com.askfar.fakepaymentprovider.enums.TransactionMessage;
+import com.askfar.fakepaymentprovider.enums.TransactionStatus;
 import com.askfar.fakepaymentprovider.enums.TransactionType;
 import com.askfar.fakepaymentprovider.exception.NotFoundException;
-import com.askfar.fakepaymentprovider.manager.TransactionManager;
 import com.askfar.fakepaymentprovider.mapper.TransactionMapper;
 import com.askfar.fakepaymentprovider.model.Transaction;
 import com.askfar.fakepaymentprovider.repository.CardRepository;
@@ -30,8 +31,6 @@ import static java.lang.String.format;
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
-
-    private final TransactionManager manager;
 
     private final CardRepository cardRepository;
 
@@ -78,11 +77,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public Mono<Transaction> createTransaction(TransactionRequestDto requestDto, String merchantId, TransactionType type) {
-        if (TransactionType.TOP_UP.equals(type)) {
-            return manager.createTopUp(requestDto, merchantId);
-        } else {
-            return manager.createPayOut(requestDto, merchantId);
-        }
+        Transaction transaction = transactionMapper.toTransactionEntity(requestDto);
+        transaction = enrichInProgress(transaction, type);
+        return Mono.just(transaction).flatMap(this::saveRelations);
     }
 
     private Mono<Transaction> getRelations(Transaction transaction) {
@@ -91,5 +88,25 @@ public class TransactionServiceImpl implements TransactionService {
                    .map(result -> result.getT1().setCustomer(result.getT2()))
                    .zipWith(cardRepository.findById(transaction.getCardId()))
                    .map(result -> result.getT1().setCard(result.getT2()));
+    }
+
+    private Mono<Transaction> saveRelations(Transaction transaction) {
+        return Mono.just(transaction)
+                   .flatMap(t -> customerRepository.save(t.getCustomer()))
+                   .map(customer -> transaction.setCustomerId(customer.getCustomerId()))
+                   .flatMap(t -> cardRepository.findByCardNumber(t.getCard().getCardNumber())
+                                               .doOnNext(card -> log.info("Card with number {} already exists", card.getCardNumber()))
+                                               .switchIfEmpty(cardRepository.save(t.getCard().setCustomerId(t.getCustomerId()))))
+                   .map(card -> transaction.setCardId(card.getCardId()))
+                   .flatMap(transactionRepository::save)
+                   .doOnSuccess(t -> log.info("Transaction with transactionId = {} accepted", t.getTransactionId()));
+    }
+
+    private Transaction enrichInProgress(Transaction transaction, TransactionType type) {
+        return transaction.setTransactionId(UUID.randomUUID())
+                          .setTransactionType(type)
+                          .setStatus(TransactionStatus.IN_PROGRESS)
+                          .setMessage(TransactionMessage.VALIDATED.getMsg())
+                          .setUpdatedAt(LocalDateTime.now());
     }
 }
