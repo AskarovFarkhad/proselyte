@@ -17,7 +17,11 @@ spring:
     password: postgres
 
 scheduled:
-  cron: "0 */30 * ? * *"
+  processingTopUpTransactionJob:
+    cron: "0 */30 * ? * *"
+  processingPayOutTransactionJob:
+    fixedDelay: 900000
+    cron: "0 */30 * ? * *"
 
 webclient:
   retryMaxAttempts: 3

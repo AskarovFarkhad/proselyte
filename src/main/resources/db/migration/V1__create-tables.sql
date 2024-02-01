@@ -59,6 +59,5 @@ CREATE TABLE webhooks_history
     notification_url VARCHAR(128),
     created_at       TIMESTAMP    NOT NULL,
     response         VARCHAR(256) NOT NULL,
-    transaction_id   INT          NOT NULL,
-    FOREIGN KEY (transaction_id) REFERENCES transactions (id)
+    transaction      jsonb        NOT NULL
 );

@@ -2,5 +2,7 @@ package com.askfar.fakepaymentprovider.service;
 
 public interface TransactionProcessingJob {
 
-    void execute();
+    void executeProcessingTopUpTransaction();
+
+    void executeProcessingPayOutTransaction();
 }

@@ -1,6 +1,8 @@
 package com.askfar.fakepaymentprovider.security;
 
+import reactor.core.publisher.Mono;
+
 public interface SecurityService {
 
-    String authorization(String authorization);
+    Mono<String> authorization(String authorization);
 }

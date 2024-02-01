@@ -48,5 +48,5 @@ public interface TransactionRepository extends R2dbcRepository<Transaction, Long
             """)
     Mono<Transaction> findByTransactionId(UUID transactionId);
 
-    Flux<Transaction> findTransactionByStatus(TransactionStatus status);
+    Flux<Transaction> findTransactionByTransactionTypeAndStatus(TransactionType type, TransactionStatus status);
 }

@@ -20,4 +20,8 @@ public interface TransactionService {
     Mono<Page<TransactionResponseDto>> findTransactionAll(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, TransactionType type);
 
     Mono<Transaction> createTransaction(TransactionRequestDto requestDto, String merchantId, TransactionType type);
+
+    void processingTopUpTransaction();
+
+    void processingPayOutTransaction();
 }

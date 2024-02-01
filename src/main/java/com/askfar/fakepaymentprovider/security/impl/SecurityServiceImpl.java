@@ -1,5 +1,6 @@
 package com.askfar.fakepaymentprovider.security.impl;
 
+import com.askfar.fakepaymentprovider.model.Merchant;
 import com.askfar.fakepaymentprovider.repository.MerchantRepository;
 import com.askfar.fakepaymentprovider.security.SecurityService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class SecurityServiceImpl implements SecurityService {
     private static final String ERROR_MSG = "Incorrect login information";
 
     @Override
-    public String authorization(String authorization) {
+    public Mono<String> authorization(String authorization) {
         if (!authorization.startsWith("Basic ")) {
             log.error(ERROR_MSG);
             throw new SecurityException(ERROR_MSG);
@@ -39,11 +40,8 @@ public class SecurityServiceImpl implements SecurityService {
             throw new SecurityException(ERROR_MSG);
         }
 
-        merchantRepository.findByMerchantIdAndSecretKeyAndEnabled(merchantId, secretKey, true)
-                          .switchIfEmpty(Mono.error(new SecurityException("Authorization failed")))
-                          .block();
-
-        log.info("Authorization successfully");
-        return merchantId;
+        return merchantRepository.findByMerchantIdAndSecretKeyAndEnabled(merchantId, secretKey, true)
+                                 .map(Merchant::getMerchantId)
+                                 .switchIfEmpty(Mono.error(new SecurityException("Authorization failed")));
     }
 }

@@ -19,5 +19,4 @@ public class TestFakePaymentProviderApplication {
 	public static void main(String[] args) {
 		SpringApplication.from(FakePaymentProviderApplication::main).with(TestFakePaymentProviderApplication.class).run(args);
 	}
-
 }

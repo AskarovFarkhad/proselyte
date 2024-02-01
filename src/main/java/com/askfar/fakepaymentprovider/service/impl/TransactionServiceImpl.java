@@ -11,6 +11,7 @@ import com.askfar.fakepaymentprovider.model.Transaction;
 import com.askfar.fakepaymentprovider.repository.CardRepository;
 import com.askfar.fakepaymentprovider.repository.CustomerRepository;
 import com.askfar.fakepaymentprovider.repository.TransactionRepository;
+import com.askfar.fakepaymentprovider.repository.WalletRepository;
 import com.askfar.fakepaymentprovider.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,8 @@ import static java.lang.String.format;
 public class TransactionServiceImpl implements TransactionService {
 
     private final CardRepository cardRepository;
+
+    private final WalletRepository walletRepository;
 
     private final TransactionMapper transactionMapper;
 
@@ -102,11 +105,72 @@ public class TransactionServiceImpl implements TransactionService {
                    .doOnSuccess(t -> log.info("Transaction with transactionId = {} accepted", t.getTransactionId()));
     }
 
+    @Override
+    public void processingTopUpTransaction() {
+        transactionRepository.findTransactionByTransactionTypeAndStatus(TransactionType.TOP_UP, TransactionStatus.IN_PROGRESS)
+                             .flatMap(transaction -> {
+                                 return walletRepository.findByMerchantIdAndCurrency(transaction.getMerchantId(), transaction.getCurrency().name())
+                                                        .flatMap(wallet -> {
+                                                            wallet.addAmount(transaction.getAmount());
+                                                            return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
+                                                                                   .then(Mono.just(enrichSuccessStatus(transaction)))
+                                                                                   .flatMap(transactionRepository::save);
+
+                                                        })
+                                                        .switchIfEmpty(Mono.just(transaction)
+                                                                           .map(t -> enrichInCurrencyNotAllowedStatus(transaction))
+                                                                           .flatMap(transactionRepository::save));
+                             })
+                             .subscribe();
+    }
+
+    @Override
+    public void processingPayOutTransaction() {
+        transactionRepository.findTransactionByTransactionTypeAndStatus(TransactionType.PAY_OUT, TransactionStatus.IN_PROGRESS)
+                             .flatMap(transaction -> {
+                                 return walletRepository.findByMerchantIdAndCurrency(transaction.getMerchantId(), transaction.getCurrency().name())
+                                                        .flatMap(wallet -> {
+                                                            if (wallet.hasBalanceDepth(transaction.getAmount())) {
+                                                                wallet.subtractAmount(transaction.getAmount());
+                                                                return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
+                                                                                       .then(Mono.just(enrichSuccessStatus(transaction)))
+                                                                                       .flatMap(transactionRepository::save);
+                                                            }
+                                                            return Mono.just(enrichInsufficientFundsStatus(transaction)).flatMap(transactionRepository::save);
+                                                        })
+                                                        .switchIfEmpty(Mono.just(transaction)
+                                                                           .map(t -> enrichInCurrencyNotAllowedStatus(transaction))
+                                                                           .flatMap(transactionRepository::save));
+                             })
+                             .subscribe();
+    }
+
     private Transaction enrichInProgress(Transaction transaction, TransactionType type) {
         return transaction.setTransactionId(UUID.randomUUID())
                           .setTransactionType(type)
                           .setStatus(TransactionStatus.IN_PROGRESS)
                           .setMessage(TransactionMessage.VALIDATED.getMsg())
+                          .setUpdatedAt(LocalDateTime.now());
+    }
+
+    private Transaction enrichInCurrencyNotAllowedStatus(Transaction transaction) {
+        return transaction.setId(null)
+                          .setStatus(TransactionStatus.FAILED)
+                          .setMessage(TransactionMessage.CURRENCY_NOT_ALLOWED.getMsg())
+                          .setUpdatedAt(LocalDateTime.now());
+    }
+
+    private Transaction enrichInsufficientFundsStatus(Transaction transaction) {
+        return transaction.setId(null)
+                          .setStatus(TransactionStatus.FAILED)
+                          .setMessage(TransactionMessage.INSUFFICIENT_FUNDS.getMsg())
+                          .setUpdatedAt(LocalDateTime.now());
+    }
+
+    private Transaction enrichSuccessStatus(Transaction transaction) {
+        return transaction.setId(null)
+                          .setStatus(TransactionStatus.SUCCESS)
+                          .setMessage(TransactionMessage.SUCCESS.getMsg())
                           .setUpdatedAt(LocalDateTime.now());
     }
 }
