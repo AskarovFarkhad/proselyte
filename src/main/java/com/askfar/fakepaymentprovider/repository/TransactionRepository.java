@@ -49,4 +49,7 @@ public interface TransactionRepository extends R2dbcRepository<Transaction, Long
     Mono<Transaction> findByTransactionId(UUID transactionId);
 
     Flux<Transaction> findTransactionByTransactionTypeAndStatus(TransactionType type, TransactionStatus status);
+
+    @Query("UPDATE transactions SET status = :status, message = :message, updated_at = :updatedAt WHERE id = :id")
+    Mono<Transaction> updateTransaction(Long id, TransactionStatus status, String message, LocalDateTime updatedAt);
 }

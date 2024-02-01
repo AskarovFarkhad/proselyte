@@ -6,6 +6,7 @@ import com.askfar.fakepaymentprovider.enums.TransactionType;
 import com.askfar.fakepaymentprovider.model.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -21,7 +22,7 @@ public interface TransactionService {
 
     Mono<Transaction> createTransaction(TransactionRequestDto requestDto, String merchantId, TransactionType type);
 
-    void processingTopUpTransaction();
+    Flux<Transaction> processingTopUpTransaction();
 
-    void processingPayOutTransaction();
+    Flux<Transaction> processingPayOutTransaction();
 }

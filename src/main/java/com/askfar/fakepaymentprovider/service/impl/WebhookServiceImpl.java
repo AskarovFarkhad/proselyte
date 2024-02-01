@@ -6,6 +6,7 @@ import com.askfar.fakepaymentprovider.model.Transaction;
 import com.askfar.fakepaymentprovider.model.WebhookHistory;
 import com.askfar.fakepaymentprovider.repository.WebhookHistoryRepository;
 import com.askfar.fakepaymentprovider.service.WebhookService;
+import com.askfar.fakepaymentprovider.util.JsonConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
@@ -25,6 +26,8 @@ public class WebhookServiceImpl implements WebhookService {
 
     private final TransactionMapper mapper;
 
+    private final JsonConverter jsonConverter;
+
     private final WebhookHistoryRepository webhookHistoryRepository;
 
     @Override
@@ -40,8 +43,8 @@ public class WebhookServiceImpl implements WebhookService {
                  .subscribe(response -> {
                      log.info("Answer from webhook service: {}", response);
                      WebhookHistory webhookHistory = new WebhookHistory().setNotificationUrl(transaction.getNotificationUrl())
-                                                                         .setTransactionId(transaction.getTransactionId())
-                                                                         .setResponse(response);
+                                                                         .setRequest(jsonConverter.toJSONObject(jsonConverter.getJson(requestDto)))
+                                                                         .setResponse(jsonConverter.toJSONObject(response));
                      webhookHistoryRepository.save(webhookHistory).subscribe();
                  });
     }

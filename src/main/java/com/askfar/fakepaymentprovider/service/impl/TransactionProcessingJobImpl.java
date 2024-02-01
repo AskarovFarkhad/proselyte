@@ -2,6 +2,7 @@ package com.askfar.fakepaymentprovider.service.impl;
 
 import com.askfar.fakepaymentprovider.service.TransactionProcessingJob;
 import com.askfar.fakepaymentprovider.service.TransactionService;
+import com.askfar.fakepaymentprovider.service.WebhookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -16,6 +17,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class TransactionProcessingJobImpl implements TransactionProcessingJob {
 
+    private final WebhookService webhookService;
+
     private final TransactionService transactionService;
 
     @Override
@@ -23,17 +26,21 @@ public class TransactionProcessingJobImpl implements TransactionProcessingJob {
     public void executeProcessingTopUpTransaction() {
         log.info("Job 'processingTopUpTransaction' started execute: {}", LocalDateTime.now());
 
-        transactionService.processingTopUpTransaction();
+        transactionService.processingTopUpTransaction()
+                          .doOnNext(webhookService::notificationService)
+                          .subscribe();
 
         log.info("Job 'processingTopUpTransaction' finished: {}", LocalDateTime.now());
     }
 
     @Override
-    @Scheduled(cron = "${scheduled.processingPayOutTransactionJob.cron}", fixedDelayString = "${scheduled.processingPayOutTransactionJob.initialDelay}")
+    //@Scheduled(cron = "${scheduled.processingPayOutTransactionJob.cron}")
     public void executeProcessingPayOutTransaction() {
         log.info("Job 'processingPayOutTransaction' started execute: {}", LocalDateTime.now());
 
-        transactionService.processingPayOutTransaction();
+        transactionService.processingPayOutTransaction()
+                          .doOnNext(webhookService::notificationService)
+                          .subscribe();
 
         log.info("Job 'processingPayOutTransaction' finished: {}", LocalDateTime.now());
     }

@@ -10,7 +10,7 @@ public enum TransactionMessage {
     VALIDATED("The transaction was successfully validated"),
     PROGRESS("Transaction accepted"),
     SUCCESS("Transaction is successfully completed"),
-    PAYOUT_MIN_AMOUNT("Insufficient funds to complete the operation"),
+    FAILED("The payment was not accepted due to a server-side error"),
     CURRENCY_NOT_ALLOWED("There is no wallet with this currency"),
     INSUFFICIENT_FUNDS("Insufficient funds to debit the account");
 

@@ -48,7 +48,7 @@ CREATE TABLE transactions
     card_id          INT,
     merchant_id      VARCHAR(64),
     status           VARCHAR(16) NOT NULL,
-    message          VARCHAR(32),
+    message          VARCHAR(128),
     FOREIGN KEY (customer_id) REFERENCES customers (customer_id),
     FOREIGN KEY (card_id) REFERENCES cards (card_id)
 );
@@ -57,7 +57,7 @@ CREATE TABLE webhooks_history
 (
     id               SERIAL PRIMARY KEY,
     notification_url VARCHAR(128),
-    created_at       TIMESTAMP    NOT NULL,
-    response         VARCHAR(256) NOT NULL,
-    transaction      jsonb        NOT NULL
+    created_at       TIMESTAMP NOT NULL,
+    response         jsonb     NOT NULL,
+    transaction      jsonb     NOT NULL
 );

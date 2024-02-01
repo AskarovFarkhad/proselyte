@@ -1,6 +1,7 @@
 package com.askfar.fakepaymentprovider.exception;
 
 import com.askfar.fakepaymentprovider.dto.response.ErrorResponseDto;
+import com.askfar.fakepaymentprovider.util.JsonConverter;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -46,7 +47,7 @@ public class ExceptionHandlerController {
                                .build();
     }
 
-    @ExceptionHandler(BusinessUnknownException.class)
+    @ExceptionHandler(value = {BusinessUnknownException.class, JsonConverter.JsonConvertingException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponseDto handleBusinessException(BusinessUnknownException ex) {
         log.error(ex.getMessage(), ex);

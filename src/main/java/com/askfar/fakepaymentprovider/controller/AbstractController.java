@@ -30,34 +30,36 @@ public abstract class AbstractController {
     private final TransactionService transactionService;
 
     protected Mono<TransactionResponseDto> findTransactionDetails(String auth, UUID transactionId) {
-        securityService.authorization(auth);
-        return transactionService.findTransactionDetails(transactionId);
+
+        return securityService.authorization(auth).flatMap(merchantId -> {
+            return transactionService.findTransactionDetails(transactionId);
+        });
     }
 
     protected Mono<Page<TransactionResponseDto>> findTransactionAll(String auth, Pageable pageable, LocalDateTime startDate, LocalDateTime endDate,
             TransactionType type) {
 
-        securityService.authorization(auth);
-
-        return nonNull(startDate) && nonNull(endDate) ? transactionService.findTransactionAll(startDate, endDate, pageable, type)
-                                                      : transactionService.findTransactionAll(pageable, type);
+        return securityService.authorization(auth).flatMap(merchantId -> {
+            return nonNull(startDate) && nonNull(endDate) ? transactionService.findTransactionAll(startDate, endDate, pageable, type)
+                                                          : transactionService.findTransactionAll(pageable, type);
+        });
     }
 
     protected Mono<ResponseEntity<TransactionCreateResponseDto>> createTransaction(String auth, TransactionRequestDto requestDto, TransactionType type) {
 
-        String merchantId = securityService.authorization(auth);
-
-        return transactionService.createTransaction(requestDto, merchantId, type)
-                                 .switchIfEmpty(Mono.error(new BusinessUnknownException("Transaction not created")))
-                                 .map(t -> {
-                                     if (TransactionStatus.SUCCESS.equals(t.getStatus())) {
-                                         return ResponseEntity.ok(new TransactionCreateResponseDto().setTransactionId(t.getTransactionId())
-                                                                                                    .setStatus(t.getStatus())
-                                                                                                    .setMessage(t.getMessage()));
-                                     } else {
-                                         return new ResponseEntity<>(new TransactionCreateResponseDto().setStatus(t.getStatus())
-                                                                                                       .setMessage(t.getMessage()), HttpStatus.BAD_REQUEST);
-                                     }
-                                 });
+        return securityService.authorization(auth).flatMap(merchantId -> {
+            return transactionService.createTransaction(requestDto, merchantId, type)
+                                     .switchIfEmpty(Mono.error(new BusinessUnknownException("Transaction not created")))
+                                     .map(t -> {
+                                         if (TransactionStatus.IN_PROGRESS.equals(t.getStatus())) {
+                                             return ResponseEntity.ok(new TransactionCreateResponseDto().setTransactionId(t.getTransactionId())
+                                                                                                        .setStatus(t.getStatus())
+                                                                                                        .setMessage(t.getMessage()));
+                                         } else {
+                                             return new ResponseEntity<>(new TransactionCreateResponseDto().setStatus(t.getStatus())
+                                                                                                           .setMessage(t.getMessage()), HttpStatus.BAD_REQUEST);
+                                         }
+                                     });
+        });
     }
 }

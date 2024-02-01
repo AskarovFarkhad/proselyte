@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -81,8 +82,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public Mono<Transaction> createTransaction(TransactionRequestDto requestDto, String merchantId, TransactionType type) {
         Transaction transaction = transactionMapper.toTransactionEntity(requestDto);
-        transaction = enrichInProgress(transaction, type);
-        return Mono.just(transaction).flatMap(this::saveRelations);
+        transaction.setMerchantId(merchantId);
+
+        return Mono.just(enrichInProgress(transaction, type))
+                   .flatMap(this::saveRelations);
     }
 
     private Mono<Transaction> getRelations(Transaction transaction) {
@@ -102,47 +105,52 @@ public class TransactionServiceImpl implements TransactionService {
                                                .switchIfEmpty(cardRepository.save(t.getCard().setCustomerId(t.getCustomerId()))))
                    .map(card -> transaction.setCardId(card.getCardId()))
                    .flatMap(transactionRepository::save)
-                   .doOnSuccess(t -> log.info("Transaction with transactionId = {} accepted", t.getTransactionId()));
+                   .doOnSuccess(t -> log.info("Transaction with transactionId={} accepted", t.getTransactionId()));
     }
 
     @Override
-    public void processingTopUpTransaction() {
-        transactionRepository.findTransactionByTransactionTypeAndStatus(TransactionType.TOP_UP, TransactionStatus.IN_PROGRESS)
-                             .flatMap(transaction -> {
-                                 return walletRepository.findByMerchantIdAndCurrency(transaction.getMerchantId(), transaction.getCurrency().name())
-                                                        .flatMap(wallet -> {
-                                                            wallet.addAmount(transaction.getAmount());
-                                                            return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
-                                                                                   .then(Mono.just(enrichSuccessStatus(transaction)))
-                                                                                   .flatMap(transactionRepository::save);
+    @Transactional
+    public Flux<Transaction> processingTopUpTransaction() {
+        return transactionRepository
+                .findTransactionByTransactionTypeAndStatus(TransactionType.TOP_UP, TransactionStatus.IN_PROGRESS)
+                .flatMap(this::getRelations)
+                .flatMap(transaction -> {
+                    return walletRepository.findByMerchantIdAndCurrency(transaction.getMerchantId(), transaction.getCurrency().name())
+                                           .flatMap(wallet -> {
 
-                                                        })
-                                                        .switchIfEmpty(Mono.just(transaction)
-                                                                           .map(t -> enrichInCurrencyNotAllowedStatus(transaction))
-                                                                           .flatMap(transactionRepository::save));
-                             })
-                             .subscribe();
+                                               if (wallet == null) {
+                                                   return enrichInCurrencyNotAllowedStatus(transaction);
+                                               }
+
+                                               wallet.addAmount(transaction.getAmount());
+                                               return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
+                                                                      .then(enrichSuccessStatus(transaction));
+                                           });
+                });
     }
 
     @Override
-    public void processingPayOutTransaction() {
-        transactionRepository.findTransactionByTransactionTypeAndStatus(TransactionType.PAY_OUT, TransactionStatus.IN_PROGRESS)
-                             .flatMap(transaction -> {
-                                 return walletRepository.findByMerchantIdAndCurrency(transaction.getMerchantId(), transaction.getCurrency().name())
-                                                        .flatMap(wallet -> {
-                                                            if (wallet.hasBalanceDepth(transaction.getAmount())) {
-                                                                wallet.subtractAmount(transaction.getAmount());
-                                                                return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
-                                                                                       .then(Mono.just(enrichSuccessStatus(transaction)))
-                                                                                       .flatMap(transactionRepository::save);
-                                                            }
-                                                            return Mono.just(enrichInsufficientFundsStatus(transaction)).flatMap(transactionRepository::save);
-                                                        })
-                                                        .switchIfEmpty(Mono.just(transaction)
-                                                                           .map(t -> enrichInCurrencyNotAllowedStatus(transaction))
-                                                                           .flatMap(transactionRepository::save));
-                             })
-                             .subscribe();
+    @Transactional
+    public Flux<Transaction> processingPayOutTransaction() {
+        return transactionRepository
+                .findTransactionByTransactionTypeAndStatus(TransactionType.PAY_OUT, TransactionStatus.IN_PROGRESS)
+                .flatMap(this::getRelations)
+                .flatMap(transaction -> {
+                    return walletRepository.findByMerchantIdAndCurrency(transaction.getMerchantId(), transaction.getCurrency().name())
+                                           .flatMap(wallet -> {
+
+                                               if (wallet == null) {
+                                                   return enrichInCurrencyNotAllowedStatus(transaction);
+                                               }
+
+                                               if (wallet.hasBalanceDepth(transaction.getAmount())) {
+                                                   wallet.subtractAmount(transaction.getAmount());
+                                                   return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
+                                                                          .then(enrichSuccessStatus(transaction));
+                                               }
+                                               return enrichInsufficientFundsStatus(transaction);
+                                           });
+                });
     }
 
     private Transaction enrichInProgress(Transaction transaction, TransactionType type) {
@@ -153,24 +161,24 @@ public class TransactionServiceImpl implements TransactionService {
                           .setUpdatedAt(LocalDateTime.now());
     }
 
-    private Transaction enrichInCurrencyNotAllowedStatus(Transaction transaction) {
-        return transaction.setId(null)
-                          .setStatus(TransactionStatus.FAILED)
-                          .setMessage(TransactionMessage.CURRENCY_NOT_ALLOWED.getMsg())
-                          .setUpdatedAt(LocalDateTime.now());
+    private Mono<Transaction> enrichInCurrencyNotAllowedStatus(Transaction t) {
+        t.setStatus(TransactionStatus.FAILED)
+         .setMessage(TransactionMessage.CURRENCY_NOT_ALLOWED.getMsg())
+         .setUpdatedAt(LocalDateTime.now());
+        return transactionRepository.updateTransaction(t.getId(), t.getStatus(), t.getMessage(), t.getUpdatedAt());
     }
 
-    private Transaction enrichInsufficientFundsStatus(Transaction transaction) {
-        return transaction.setId(null)
-                          .setStatus(TransactionStatus.FAILED)
-                          .setMessage(TransactionMessage.INSUFFICIENT_FUNDS.getMsg())
-                          .setUpdatedAt(LocalDateTime.now());
+    private Mono<Transaction> enrichInsufficientFundsStatus(Transaction t) {
+        t.setStatus(TransactionStatus.FAILED)
+         .setMessage(TransactionMessage.INSUFFICIENT_FUNDS.getMsg())
+         .setUpdatedAt(LocalDateTime.now());
+        return transactionRepository.updateTransaction(t.getId(), t.getStatus(), t.getMessage(), t.getUpdatedAt());
     }
 
-    private Transaction enrichSuccessStatus(Transaction transaction) {
-        return transaction.setId(null)
-                          .setStatus(TransactionStatus.SUCCESS)
-                          .setMessage(TransactionMessage.SUCCESS.getMsg())
-                          .setUpdatedAt(LocalDateTime.now());
+    private Mono<Transaction> enrichSuccessStatus(Transaction t) {
+        t.setStatus(TransactionStatus.SUCCESS)
+         .setMessage(TransactionMessage.SUCCESS.getMsg())
+         .setUpdatedAt(LocalDateTime.now());
+        return transactionRepository.updateTransaction(t.getId(), t.getStatus(), t.getMessage(), t.getUpdatedAt());
     }
 }

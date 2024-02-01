@@ -18,10 +18,10 @@ spring:
 
 scheduled:
   processingTopUpTransactionJob:
-    cron: "0 */30 * ? * *"
+    cron: "0 */5 * ? * *"
   processingPayOutTransactionJob:
     fixedDelay: 900000
-    cron: "0 */30 * ? * *"
+    cron: "0 */15 * ? * *"
 
 webclient:
   retryMaxAttempts: 3
