@@ -8,6 +8,7 @@ import com.askfar.fakepaymentprovider.enums.TransactionType;
 import com.askfar.fakepaymentprovider.exception.NotFoundException;
 import com.askfar.fakepaymentprovider.mapper.TransactionMapper;
 import com.askfar.fakepaymentprovider.model.Transaction;
+import com.askfar.fakepaymentprovider.model.Wallet;
 import com.askfar.fakepaymentprovider.repository.CardRepository;
 import com.askfar.fakepaymentprovider.repository.CustomerRepository;
 import com.askfar.fakepaymentprovider.repository.TransactionRepository;
@@ -43,6 +44,8 @@ public class TransactionServiceImpl implements TransactionService {
     private final CustomerRepository customerRepository;
 
     private final TransactionRepository transactionRepository;
+
+    private static final Wallet EMPTY_WALLET = new Wallet();
 
     @Override
     @Transactional(readOnly = true)
@@ -98,7 +101,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private Mono<Transaction> saveRelations(Transaction transaction) {
         return Mono.just(transaction)
-                   .flatMap(t -> customerRepository.save(t.getCustomer()))
+                   .flatMap(t -> customerRepository.save(t.getCustomer())) // TODO нужно идентификационное поле, чтобы не дублировать customer
                    .map(customer -> transaction.setCustomerId(customer.getCustomerId()))
                    .flatMap(t -> cardRepository.findByCardNumber(t.getCard().getCardNumber())
                                                .doOnNext(card -> log.info("Card with number {} already exists", card.getCardNumber()))
@@ -116,15 +119,14 @@ public class TransactionServiceImpl implements TransactionService {
                 .flatMap(this::getRelations)
                 .flatMap(transaction -> {
                     return walletRepository.findByMerchantIdAndCurrency(transaction.getMerchantId(), transaction.getCurrency().name())
+                                           .defaultIfEmpty(EMPTY_WALLET)
                                            .flatMap(wallet -> {
-
-                                               if (wallet == null) {
-                                                   return enrichInCurrencyNotAllowedStatus(transaction);
+                                               if (wallet.getCurrency() != null) {
+                                                   wallet.addAmount(transaction.getAmount());
+                                                   return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
+                                                                          .then(enrichSuccessStatus(transaction));
                                                }
-
-                                               wallet.addAmount(transaction.getAmount());
-                                               return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
-                                                                      .then(enrichSuccessStatus(transaction));
+                                               return enrichInCurrencyNotAllowedStatus(transaction);
                                            });
                 });
     }
@@ -137,18 +139,17 @@ public class TransactionServiceImpl implements TransactionService {
                 .flatMap(this::getRelations)
                 .flatMap(transaction -> {
                     return walletRepository.findByMerchantIdAndCurrency(transaction.getMerchantId(), transaction.getCurrency().name())
+                                           .defaultIfEmpty(EMPTY_WALLET)
                                            .flatMap(wallet -> {
-
-                                               if (wallet == null) {
-                                                   return enrichInCurrencyNotAllowedStatus(transaction);
+                                               if (wallet.getCurrency() != null) {
+                                                   if (wallet.hasBalanceDepth(transaction.getAmount())) {
+                                                       wallet.subtractAmount(transaction.getAmount());
+                                                       return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
+                                                                              .then(enrichSuccessStatus(transaction));
+                                                   }
+                                                   return enrichInsufficientFundsStatus(transaction);
                                                }
-
-                                               if (wallet.hasBalanceDepth(transaction.getAmount())) {
-                                                   wallet.subtractAmount(transaction.getAmount());
-                                                   return walletRepository.updateWalletByWalletId(wallet.getWalletId(), wallet.getBalance())
-                                                                          .then(enrichSuccessStatus(transaction));
-                                               }
-                                               return enrichInsufficientFundsStatus(transaction);
+                                               return enrichInCurrencyNotAllowedStatus(transaction);
                                            });
                 });
     }
@@ -162,6 +163,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private Mono<Transaction> enrichInCurrencyNotAllowedStatus(Transaction t) {
+        log.info("Transaction transactionId={} ({}) was rejected due to the lack of a wallet with that currency (FAILED)",
+                t.getTransactionId(), t.getTransactionType());
         t.setStatus(TransactionStatus.FAILED)
          .setMessage(TransactionMessage.CURRENCY_NOT_ALLOWED.getMsg())
          .setUpdatedAt(LocalDateTime.now());
@@ -169,6 +172,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private Mono<Transaction> enrichInsufficientFundsStatus(Transaction t) {
+        log.info("Transaction transactionId={} ({}) was rejected due to insufficient funds in the wallet (FAILED)",
+                t.getTransactionId(), t.getTransactionType());
         t.setStatus(TransactionStatus.FAILED)
          .setMessage(TransactionMessage.INSUFFICIENT_FUNDS.getMsg())
          .setUpdatedAt(LocalDateTime.now());
@@ -176,6 +181,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private Mono<Transaction> enrichSuccessStatus(Transaction t) {
+        log.info("Transaction transactionId={} ({}) was completed successfully (SUCCESS)",
+                t.getTransactionId(), t.getTransactionType());
         t.setStatus(TransactionStatus.SUCCESS)
          .setMessage(TransactionMessage.SUCCESS.getMsg())
          .setUpdatedAt(LocalDateTime.now());

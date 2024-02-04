@@ -1,20 +1,20 @@
 {
-  "transaction_id": "eb488939-7d59-4a40-831a-169c686e5747",
+  "transaction_id": "e3480b72-c82c-45cd-beb7-a8155b04b7e0",
   "payment_method": "CARD",
-  "amount": "1000",
-  "currency": "BRL",
+  "amount": "10.00",
+  "currency": "USD",
   "created_at": "2023-02-16T09:12:34.413",
   "updated_at": "2023-02-16T09:12:34.413",
   "card_data": {
-    "card_number": "4102778822334893"
+    "card_number": "1111***1111"
   },
-  "language": "en",
-  "notification_url": "https://proselyte.net/webhook/transaction",
+  "language": "EN",
+  "notification_url": "https://65bbd4bf52189914b5bd2c40.mockapi.io/api/v1/webhook/transaction/topup",
   "customer": {
     "first_name": "John",
     "last_name": "Doe",
-    "country": "BR"
+    "country": "USA"
   },
-  "status": "APPROVED",
+  "status": "SUCCESS",
   "message": "OK"
 }

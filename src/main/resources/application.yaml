@@ -10,6 +10,7 @@ spring:
     url: r2dbc:postgresql://localhost:5432/postgres
     username: postgres
     password: postgres
+    driver-class-name: org.postgresql.Driver
   flyway:
     url: jdbc:postgresql://localhost:5432/postgres
     locations: classpath:db/migration
@@ -18,10 +19,10 @@ spring:
 
 scheduled:
   processingTopUpTransactionJob:
-    cron: "0 */5 * ? * *"
+    cron: "0 */3 * ? * *"
   processingPayOutTransactionJob:
     fixedDelay: 900000
-    cron: "0 */15 * ? * *"
+    cron: "0 */2 * ? * *"
 
 webclient:
   retryMaxAttempts: 3

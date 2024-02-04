@@ -15,6 +15,7 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
@@ -33,19 +34,22 @@ public class WebhookServiceImpl implements WebhookService {
     @Override
     @Retryable(maxAttemptsExpression = "${webclient.retryMaxAttempts}",
             backoff = @Backoff(delayExpression = "${webclient.retryMaxDelay}"), recover = "recoverNotificationService")
-    public void notificationService(Transaction transaction) {
+    public Mono<WebhookHistory> notificationService(Transaction transaction) {
+        log.info("Sending a transaction notification transactionId={} ({})", transaction.getTransactionId(), transaction.getTransactionType());
+
         TransactionWebhookRequestDto requestDto = mapper.toTransactionWebhookRequestDto(transaction);
-        webClient.post()
+
+        return webClient.post()
                  .uri(transaction.getNotificationUrl())
                  .bodyValue(requestDto)
                  .retrieve()
                  .bodyToMono(String.class)
-                 .subscribe(response -> {
+                 .flatMap(response -> {
                      log.info("Answer from webhook service: {}", response);
                      WebhookHistory webhookHistory = new WebhookHistory().setNotificationUrl(transaction.getNotificationUrl())
                                                                          .setRequest(jsonConverter.toJSONObject(jsonConverter.getJson(requestDto)))
                                                                          .setResponse(jsonConverter.toJSONObject(response));
-                     webhookHistoryRepository.save(webhookHistory).subscribe();
+                     return webhookHistoryRepository.save(webhookHistory);
                  });
     }
 

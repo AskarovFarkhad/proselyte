@@ -26,22 +26,14 @@ public class TransactionProcessingJobImpl implements TransactionProcessingJob {
     public void executeProcessingTopUpTransaction() {
         log.info("Job 'processingTopUpTransaction' started execute: {}", LocalDateTime.now());
 
-        transactionService.processingTopUpTransaction()
-                          .doOnNext(webhookService::notificationService)
-                          .subscribe();
-
-        log.info("Job 'processingTopUpTransaction' finished: {}", LocalDateTime.now());
+        transactionService.processingTopUpTransaction().flatMap(webhookService::notificationService).subscribe();
     }
 
     @Override
-    //@Scheduled(cron = "${scheduled.processingPayOutTransactionJob.cron}")
+    @Scheduled(cron = "${scheduled.processingPayOutTransactionJob.cron}")
     public void executeProcessingPayOutTransaction() {
         log.info("Job 'processingPayOutTransaction' started execute: {}", LocalDateTime.now());
 
-        transactionService.processingPayOutTransaction()
-                          .doOnNext(webhookService::notificationService)
-                          .subscribe();
-
-        log.info("Job 'processingPayOutTransaction' finished: {}", LocalDateTime.now());
+        transactionService.processingPayOutTransaction().flatMap(webhookService::notificationService).subscribe();
     }
 }
