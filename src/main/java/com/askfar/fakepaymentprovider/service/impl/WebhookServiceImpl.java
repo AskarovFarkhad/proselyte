@@ -40,17 +40,17 @@ public class WebhookServiceImpl implements WebhookService {
         TransactionWebhookRequestDto requestDto = mapper.toTransactionWebhookRequestDto(transaction);
 
         return webClient.post()
-                 .uri(transaction.getNotificationUrl())
-                 .bodyValue(requestDto)
-                 .retrieve()
-                 .bodyToMono(String.class)
-                 .flatMap(response -> {
-                     log.info("Answer from webhook service: {}", response);
-                     WebhookHistory webhookHistory = new WebhookHistory().setNotificationUrl(transaction.getNotificationUrl())
-                                                                         .setRequest(jsonConverter.toJSONObject(jsonConverter.getJson(requestDto)))
-                                                                         .setResponse(jsonConverter.toJSONObject(response));
-                     return webhookHistoryRepository.save(webhookHistory);
-                 });
+                        .uri(transaction.getNotificationUrl())
+                        .bodyValue(requestDto)
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .flatMap(response -> {
+                            log.info("Answer from webhook service: {}", response);
+                            WebhookHistory webhookHistory = new WebhookHistory().setNotificationUrl(transaction.getNotificationUrl())
+                                                                                .setRequest(jsonConverter.toJSONObject(jsonConverter.getJson(requestDto)))
+                                                                                .setResponse(jsonConverter.toJSONObject(response));
+                            return webhookHistoryRepository.save(webhookHistory);
+                        });
     }
 
     @Recover

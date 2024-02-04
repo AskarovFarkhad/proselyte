@@ -101,7 +101,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private Mono<Transaction> saveRelations(Transaction transaction) {
         return Mono.just(transaction)
-                   .flatMap(t -> customerRepository.save(t.getCustomer())) // TODO нужно идентификационное поле, чтобы не дублировать customer
+                   .flatMap(t -> customerRepository.save(t.getCustomer())) // нужно идентификационное поле, чтобы не дублировать customer
                    .map(customer -> transaction.setCustomerId(customer.getCustomerId()))
                    .flatMap(t -> cardRepository.findByCardNumber(t.getCard().getCardNumber())
                                                .doOnNext(card -> log.info("Card with number {} already exists", card.getCardNumber()))

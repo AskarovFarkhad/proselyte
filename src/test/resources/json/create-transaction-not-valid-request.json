@@ -1,0 +1,18 @@
+{
+  "payment_method": "CARD",
+  "amount": "sd",
+  "currency": "USD",
+  "created_at": "2023-02-16T09:12:34.413",
+  "card_data": {
+    "card_number": "52778822334893",
+    "exp_date": "11/22",
+    "cvv": 111
+  },
+  "language": "EN",
+  "notification_url": "https://65bbd4bf52189914b5bd2c40.mockapi.io/api/v1/webhook/transaction/topup",
+  "customer": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "country": "BR"
+  }
+}

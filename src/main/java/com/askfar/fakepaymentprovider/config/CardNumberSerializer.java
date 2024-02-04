@@ -10,11 +10,7 @@ public class CardNumberSerializer extends JsonSerializer<String> {
 
     @Override
     public void serialize(String cardNumber, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        if (cardNumber != null && cardNumber.length() >= 16) {
-            String maskedCardNumber = cardNumber.substring(0, 4) + "***" + cardNumber.substring(cardNumber.length() - 4);
-            jsonGenerator.writeString(maskedCardNumber);
-        } else {
-            jsonGenerator.writeString(cardNumber);
-        }
+        String maskedCardNumber = cardNumber.substring(0, 4) + "***" + cardNumber.substring(cardNumber.length() - 4);
+        jsonGenerator.writeString(maskedCardNumber);
     }
 }

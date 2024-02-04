@@ -17,8 +17,9 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class ExceptionHandlerController {
 
-    @ExceptionHandler(value = {ValidationException.class, MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = {ValidationException.class, MethodArgumentNotValidException.class,
+            HttpMessageNotReadableException.class, IllegalArgumentException.class})
     public ErrorResponseDto handeValidationException(Exception ex) {
         log.error(ex.getMessage(), ex);
         return ErrorResponseDto.builder()
@@ -30,16 +31,6 @@ public class ExceptionHandlerController {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponseDto handleEntityNotFoundException(NotFoundException ex) {
-        log.error(ex.getMessage(), ex);
-        return ErrorResponseDto.builder()
-                               .message(ex.getMessage())
-                               .timestamp(LocalDateTime.now())
-                               .build();
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponseDto handleIllegalArgumentException(IllegalArgumentException ex) {
         log.error(ex.getMessage(), ex);
         return ErrorResponseDto.builder()
                                .message(ex.getMessage())

@@ -1,7 +1,6 @@
 package com.askfar.fakepaymentprovider.model;
 
 import lombok.Data;
-import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -15,10 +14,5 @@ public class Merchant {
     private String secretKey;
 
     private boolean enabled;
-
-    @ToString.Include(name = "secretKey")
-    private String maskSecretKey() {
-        return "********";
-    }
 }
 
