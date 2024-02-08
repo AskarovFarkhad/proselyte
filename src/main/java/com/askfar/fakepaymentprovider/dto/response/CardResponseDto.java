@@ -1,6 +1,6 @@
 package com.askfar.fakepaymentprovider.dto.response;
 
-import com.askfar.fakepaymentprovider.config.CardNumberSerializer;
+import com.askfar.fakepaymentprovider.config.jackson.CardNumberSerializer;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

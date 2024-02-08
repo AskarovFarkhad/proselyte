@@ -1,6 +1,6 @@
 package com.askfar.fakepaymentprovider.dto.request;
 
-import com.askfar.fakepaymentprovider.config.LocalDateDeserializer;
+import com.askfar.fakepaymentprovider.config.jackson.LocalDateDeserializer;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

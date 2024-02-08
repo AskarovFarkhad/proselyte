@@ -1,4 +1,4 @@
-package com.askfar.fakepaymentprovider.config;
+package com.askfar.fakepaymentprovider.config.jackson;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

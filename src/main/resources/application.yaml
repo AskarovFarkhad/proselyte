@@ -19,7 +19,7 @@ spring:
 
 scheduled:
   processingTopUpTransactionJob:
-    cron: "0 */3 * ? * *"
+    cron: "15 * * ? * *"
   processingPayOutTransactionJob:
     fixedDelay: 900000
     cron: "0 */2 * ? * *"

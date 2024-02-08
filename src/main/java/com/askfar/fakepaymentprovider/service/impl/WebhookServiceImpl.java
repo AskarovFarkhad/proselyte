@@ -47,8 +47,8 @@ public class WebhookServiceImpl implements WebhookService {
                         .flatMap(response -> {
                             log.info("Answer from webhook service: {}", response);
                             WebhookHistory webhookHistory = new WebhookHistory().setNotificationUrl(transaction.getNotificationUrl())
-                                                                                .setRequest(jsonConverter.toJSONObject(jsonConverter.getJson(requestDto)))
-                                                                                .setResponse(jsonConverter.toJSONObject(response));
+                                                                                .setRequest(jsonConverter.getJson(requestDto))
+                                                                                .setResponse(response);
                             return webhookHistoryRepository.save(webhookHistory);
                         });
     }
