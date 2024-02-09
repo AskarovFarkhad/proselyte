@@ -1,3 +1,4 @@
+-- Временное решение для отладки
 INSERT INTO customers (first_name, last_name, country)
 VALUES ('John', 'Doe', 'USA'),
        ('Jane', 'Smith', 'UK'),

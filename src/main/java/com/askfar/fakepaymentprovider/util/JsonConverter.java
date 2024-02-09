@@ -21,14 +21,6 @@ public class JsonConverter {
         }
     }
 
-    public <T> T getObject(String json, Class<T> tClass) {
-        try {
-            return objectMapper.readValue(json, tClass);
-        } catch (JsonProcessingException e) {
-            throw new JsonConvertingException("Failed convert Json to Object", e);
-        }
-    }
-
     public static class JsonConvertingException extends RuntimeException {
         public JsonConvertingException(String message, Throwable cause) {
             super(message, cause);

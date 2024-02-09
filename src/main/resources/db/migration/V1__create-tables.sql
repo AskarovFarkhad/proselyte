@@ -58,6 +58,6 @@ CREATE TABLE webhooks_history
     id               SERIAL PRIMARY KEY,
     notification_url VARCHAR(128),
     created_at       TIMESTAMP NOT NULL,
-    response         TEXT     NOT NULL,
-    request          TEXT     NOT NULL
+    response         TEXT      NOT NULL,
+    request          TEXT      NOT NULL
 );

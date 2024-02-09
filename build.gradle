@@ -43,11 +43,12 @@ dependencies {
     testImplementation 'org.testcontainers:r2dbc'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'org.assertj:assertj-core:3.25.2'
+    testImplementation "org.assertj:assertj-core:$assertjCoreVersion"
 
     // utils
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testImplementation "org.projectlombok:lombok:$lombokVersion"
 
     implementation "org.mapstruct:mapstruct:$mapstructVersion"
     annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
