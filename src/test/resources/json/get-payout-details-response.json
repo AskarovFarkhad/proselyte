@@ -1,0 +1,20 @@
+{
+  "transaction_id": "7f85bf5f-1b93-4bee-914a-a59264e6a344",
+  "payment_method": "CARD",
+  "amount": "30.00",
+  "currency": "GBP",
+  "created_at": "2023-02-16T09:12:34.413",
+  "updated_at": "2023-02-16T09:12:34.413",
+  "card_data": {
+    "card_number": "3333***3333"
+  },
+  "language": "EN",
+  "notification_url": "https://65bbd4bf52189914b5bd2c40.mockapi.io/api/v1/webhook/transaction/payout",
+  "customer": {
+    "first_name": "Michael",
+    "last_name": "Johnson",
+    "country": "Canada"
+  },
+  "status": "FAILED",
+  "message": "FAIL"
+}

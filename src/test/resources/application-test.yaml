@@ -1,0 +1,26 @@
+server:
+  port: 8082
+
+rest:
+  api: api/v1/payments
+  swagger: http://localhost:8082/swagger-ui/index.html#/
+
+spring:
+  r2dbc:
+    url: r2dbc:tc:postgresql:///test_db?TC_IMAGE_TAG=latest
+    username: username
+    password: password
+    driver-class-name: org.testcontainers.r2dbc.R2DBCDatabaseContainer
+  flyway:
+    enabled: false
+
+scheduled:
+  processingTopUpTransactionJob:
+    cron: "0 */30 * ? * *"
+  processingPayOutTransactionJob:
+    fixedDelay: 900000
+    cron: "0 */30 * ? * *"
+
+webclient:
+  retryMaxAttempts: 3
+  retryMaxDelay: 3000

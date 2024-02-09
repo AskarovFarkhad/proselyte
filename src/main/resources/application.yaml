@@ -1,1 +1,29 @@
+server:
+  port: 8082
 
+rest:
+  api: api/v1/payments
+  swagger: http://localhost:8082/swagger-ui/index.html#/
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    url: jdbc:postgresql://localhost:5432/postgres
+    locations: classpath:db/migration
+    user: postgres
+    password: postgres
+
+scheduled:
+  processingTopUpTransactionJob:
+    cron: "15 * * ? * *"
+  processingPayOutTransactionJob:
+    fixedDelay: 900000
+    cron: "0 */2 * ? * *"
+
+webclient:
+  retryMaxAttempts: 3
+  retryMaxDelay: 3000

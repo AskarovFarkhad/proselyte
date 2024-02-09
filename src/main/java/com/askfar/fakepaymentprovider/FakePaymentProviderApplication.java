@@ -9,5 +9,4 @@ public class FakePaymentProviderApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FakePaymentProviderApplication.class, args);
 	}
-
 }
